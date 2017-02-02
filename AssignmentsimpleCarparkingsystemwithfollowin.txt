@@ -1,0 +1,48 @@
+Assignment simple Car parking system with following model.
+
+You can add your changes and normalize db if required.
+
+Vechicle:    
+	Name    
+	Number    
+	Type - (Truck,SUV,car,bike,cycle)    
+	Intime    
+	Outtime
+
+Fare:     
+vech_type  car   truck    
+fare         50    200
+
+User story :
+	As a user i should able to see list of all vechicle entries for current day.
+	As a user i should able to edit a record in list.
+	As a user i should able to add new entry in list.
+
+Three Pages:
+	1) Add:    Use simple html element and ajax call to store information in model    
+	Dont use django form and html form.    
+	Make use of jquery validation plugin and jquery ui calendar, timepicker plugin    
+	Validation:        
+		specially alphanumneic check in name        
+		and time check for current date.        
+		Ok to use browser specific time checks.        
+		Use momentjs plugin for the same
+
+	2) Edit:    Use Ajax call to retrive data from db on document load and fill html element.    
+	Use simple jquery ajax call to save edited changes.    
+	Make use of jquery validation plugin and jquery ui calendar, timepicker plugin    
+	Validation:        
+		specially alphanumneic check in name        
+		and time check for current date.        
+		Ok to use browser specific time checks.        
+		Use momentjs plugin for the same
+
+	3) List (Index page):    Use Ajax call to retrive data from db on document load and fill html elements i.e. list of entries for current day time.    
+	Make sure to indicate elapsed time entries through different color or with opacity.    
+	Add , edit button on each record in list, which will navigate to edit form.    
+	On top of page there should be "ADD" button which takes to add form.    
+	Optional :    
+		Add delete button on each record , the delete should be through ajax call on same page , confirmation modal (dialog box) should be there.
+	Other constraint:    
+		Needs to include bootstrap CSS for UI.    
+		You are allowed to use any exisitng free opensource theme for this task.
