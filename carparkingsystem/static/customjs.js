@@ -1,0 +1,239 @@
+$(document).ready(function(){
+	$('#datetimepicker_intime').datetimepicker();
+	$('#datetimepicker_outtime').datetimepicker();
+	if(window.location.pathname === '/'){
+		getCarsParkedList();
+	}else if(window.location.href.indexOf("edit") > -1) {
+		// console.log("here 2");
+		getEditCar();
+		// console.log("here 4");
+	}if(window.location.href.indexOf("addnew") > -1) {
+		$(".add-form").removeClass('dnone');
+		$(".loading").addClass('dnone');
+		console.log($('#v_number').length,'===');
+		// $('#v_number').valid();
+		$.validator.addMethod("alphanumeric", function(value, element) {
+		        return this.optional(element) || /^[a-zA-Z0-9]+$/.test(value);
+		}); 
+		$("#addForm").validate({
+	      rules: {
+	         v_number: {
+	            required: true,
+	            alphanumeric: true
+	          }
+	         },
+	         messages: {
+	            v_number: "Only alphanumeric characters are allowed!"
+	         }
+	     });
+		console.log($('#v_number').length,'==2=');
+	}
+});
+
+function saveEditCar(){
+	var inputDiv = $(".edit-form");
+	var v_id = inputDiv.find("#v_id").val();
+	var v_type = inputDiv.find('#v_type').val();
+	var v_name = inputDiv.find('#v_name').val();
+	var v_number = inputDiv.find('#v_number').val();
+	var v_intime = inputDiv.find('#v_intime').val();
+	var v_outtime = inputDiv.find('#v_outtime').val();
+	if(v_type != '' || v_name != '' || v_number != '' || v_id != ''){// || v_outtime != '' || v_intime != ''){
+		$.ajax({
+			url: '/saveedit/',
+			type: 'post',
+			data : {
+				'v_id':v_id,
+				'v_type':v_type,
+				'v_name':v_name,
+				'v_number':v_number,
+				'v_intime':v_intime,
+				'v_outtime':v_outtime,
+				'csrfmiddlewaretoken':$( "#csrfmiddlewaretoken" ).val()
+			},
+			beforeSend: function(){
+				$(".edit-form").addClass('dnone');
+				$(".loading").removeClass('dnone');
+			},
+			success: function(response){
+				console.log(response, '====Success response===');
+				document.write('<h2>Success</h2><br><h1>Loading ...</h1>');
+				setTimeout(function(){
+					window.location.href = '/';
+				}, 3000);
+			},
+			error: function(response){
+				console.log(response, '====Error response===');
+			}
+		});
+	}else{
+		alert("Invalid Data");
+	}
+}
+
+function addNewCar(){
+	$("#addForm").validate();
+	var inputDiv = $(".add-form");
+	var v_type = inputDiv.find('#v_type').val();
+	var v_name = inputDiv.find('#v_name').val();
+	var v_number = inputDiv.find('#v_number').val();
+	var v_intime = inputDiv.find('#v_intime').val();
+	var v_outtime = inputDiv.find('#v_outtime').val();
+	if(v_type != '' || v_name != '' || v_number != ''){// || v_outtime != '' || v_intime != ''){
+		$.ajax({
+			url: '/addnew/',
+			type: 'post',
+			data : {
+				'v_type':v_type,
+				'v_name':v_name,
+				'v_number':v_number,
+				'v_intime':v_intime,
+				'v_outtime':v_outtime
+			},
+			beforeSend: function(){
+				$(".add-form").addClass('dnone');
+				$(".loading").removeClass('dnone');
+			},
+			success: function(response){
+				console.log(response, '====Success response===');
+				document.write('<h2>Success</h2><br><h1>Loading ...</h1>');
+				setTimeout(function(){
+					window.location.href = '/';
+				}, 3000);
+			},
+			error: function(response){
+				console.log(response, '====Error response===');
+			}
+		});
+	}else{
+		alert("Invalid Data");
+	}
+}
+
+function addNewPage() {
+	window.location.href = "/addnew/";
+}
+
+function deleteCarParked(v_id){
+	$.ajax({
+		url: '/delete/',
+		type: 'post',
+		data: {
+			'v_id' : v_id
+		},
+		success: function(response){
+			console.log(response,"====success delete response===");
+			$("#vehicles_table").addClass('dnone').after('<h2>Success</h2><br><h1>Loading ...</h1>');
+			setTimeout(function(){
+				window.location.href = '/';
+			}, 3000);
+		},
+		error: function(response){
+			console.log(response,"====error delete response===");
+		}
+	})
+}
+
+function editCar(v_id){
+	// console.log("here 1");
+	window.location.href = "/edit/"+v_id;
+}
+
+function getEditCar(){
+	// console.log("here 3");
+	var path = window.location.pathname;
+	var pathArr = path.split("/");
+	var v_id = pathArr[pathArr.length-2];
+	$.ajax({
+		url: '/getedit/'+v_id,
+		type: 'get',
+		success: function(response){
+			// console.log(response, '===success response===');
+			if(response.vehicle_list !== undefined){
+				var v_type = response.vehicle_list[0].type;
+				var v_name = response.vehicle_list[0].name;
+				var v_number = response.vehicle_list[0].number;
+				// var v_intime = response.vehicle_list[0].intime;
+				// var v_outtime = response.vehicle_list[0].outtime;
+				var v_intime = moment.parseZone(response.vehicle_list[0].intime).format('YYYY/MM/DD, h:mm:ss A');
+				var v_outtime = moment.parseZone(response.vehicle_list[0].outtime).format('YYYY/MM/DD, h:mm:ss A');
+				var v_id = response.vehicle_list[0].id;
+
+				var inputDiv = $(".edit-form");
+				inputDiv.removeClass('dnone');
+				$(".loading").addClass("dnone");
+				inputDiv.find('#v_type').val(v_type);
+				inputDiv.find('#v_name').val(v_name);
+				inputDiv.find('#v_number').val(v_number);
+				// inputDiv.find('#v_intime').val(v_intime);
+				// inputDiv.find('#v_outtime').val(v_outtime);
+				inputDiv.find('#v_id').val(v_id);
+				$('#datetimepicker_e_intime').datetimepicker({
+					defaultDate: v_intime,
+					enabledDates: [
+                        moment(v_intime)
+                    ]
+				});
+				$('#datetimepicker_e_outtime').datetimepicker({
+					defaultDate: v_outtime,
+					enabledDates: [
+                        moment(v_outtime)
+                    ]
+				});
+			}
+
+		},
+		error: function(response){
+			console.log(response, '===error response===');
+			window.location.href = "/";
+		}
+	})
+}
+
+function getCarsParkedList(){
+	$.ajax({
+		url:'/getparking',
+		type: 'get',
+		dataType: 'json',
+		success: function(response){
+			var table_tr  = '<caption>Vehicles Parked</caption>\
+						<thead>\
+							<tr>\
+								<th>Type</th>\
+								<th>Name</th>\
+								<th>Number</th>\
+								<th>In-Time</th>\
+								<th>Out-Time</th>\
+								<th>Action</th>\
+							</tr>\
+						</thead>\
+						<tbody>'
+			for(var i=0; i<response.vehicle_list.length; i++){
+				var v_type = response.vehicle_list[i].type;
+				var v_name = response.vehicle_list[i].name;
+				var v_number = response.vehicle_list[i].number;
+				// var v_intime = response.vehicle_list[i].intime;
+				var v_intime = moment.parseZone(response.vehicle_list[i].intime).format('YYYY/MM/DD, h:mm:ss a');
+				var v_outtime = moment.parseZone(response.vehicle_list[i].outtime).format('YYYY/MM/DD, h:mm:ss a');
+				// var v_outtime = response.vehicle_list[i].outtime;
+				var v_id = response.vehicle_list[i].id;
+				table_tr += '<tr> \
+								<td>'+v_type+'</td>\
+								<td>'+v_name+'</td>\
+								<td>'+v_number+'</td>\
+								<td>'+v_intime+'</td>\
+								<td>'+v_outtime+'</td>\
+								<td>\
+									<a class="btn btn-warning" href="/edit/'+v_id+'" role="button">Edit</a>\
+									<button id="'+v_id+'" class="btn btn-danger" onclick=deleteCarParked('+v_id+')>Delete</button>\
+								</td>\
+							</tr>';
+			}
+			$("#vehicles_table").html(table_tr+'</tbody>')
+
+		},
+		error:function(response){
+			console.log(response,'==error==');
+		}
+	});
+}

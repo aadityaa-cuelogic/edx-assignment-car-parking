@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Welcome Page</title>
+	<!-- Scripts -->
+ 	<!-- <script src="{% static 'jquery-3.1.1.min.js' %}"></script> -->
+ 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+ 	<link rel="stylesheet" type="text/css" href="{% static 'customcss.css' %}">
+ 	<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+ 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css" />
+</head>
+<body>
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Car Parking</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="/">Home</a></li>
+            <li><a href="/addnew/">Add New</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    	<div class="starter-template">
+        	<div class="col-md-12">
+				<table id="vehicles_table" class="table table-hover">
+					<caption>Vehicles Parked</caption>
+					<thead>
+						<tr>
+							<th>Type</th>
+							<th>Name</th>
+							<th>Number</th>
+							<th>In-Time</th>
+							<th>Out-Time</th>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+			</div>
+      	</div>
+    </div>
+	<!-- <button onclick="addNewPage()">Add New</button> -->
+	
+
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'moment.min.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js"></script>
+<script src="{% static 'customjs.js' %}"></script>
+</body>
+</html>
