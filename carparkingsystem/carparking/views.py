@@ -1,9 +1,11 @@
 from django.shortcuts import render
+from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import json
 from django.utils import timezone
 from datetime import datetime
+from django.utils import dateparse
 
 from .models import Vehicle, Fare
 
@@ -74,16 +76,24 @@ def save_edit_car_entry(request):
 		v_type = request.POST['v_type']
 		v_name = request.POST['v_name']
 		v_number = request.POST['v_number']
-		v_intime = timezone.now()
-		v_outtime = timezone.now()
+		v_intime = dateparse.parse_datetime(request.POST['v_intime'])
+		v_outtime = dateparse.parse_datetime(request.POST['v_outtime'])
 
-		try:
-			vehicle_obj = Vehicle.objects.get(pk=v_id)
-		except Vehicle.DoesNotExist:
-			return HttpResponse(404)
-		Vehicle.objects.filter(pk=v_id).update(v_type=v_type, name=v_name,
-				 number=v_number, intime=v_intime, outtime=v_outtime)
-		return HttpResponse(status=200)
+		v_list = { 'CAR' : 'Car',
+					'TRUCK':'Truck',
+					'BIKE':'Bike',
+					'TAXI':'Taxi'
+				}
+		if v_type in v_list:
+			try:
+				# vehicle_obj = Vehicle.objects.get(pk=v_id)
+				Vehicle.objects.filter(pk=v_id).update(v_type=v_type, name=v_name,
+					 number=v_number, intime=v_intime, outtime=v_outtime)
+			except Vehicle.DoesNotExist or IntegrityError as e:
+				return HttpResponse(404)
+			return HttpResponse(status=200)
+		else:
+			return HttpResponse(status=400)
 	else:
 		return HttpResponse(status=400)
 
@@ -108,25 +118,33 @@ def add_new_car_parked(request):
 		v_type = request.POST['v_type']
 		v_name = request.POST['v_name']
 		v_number = request.POST['v_number']
-		v_intime = timezone.now()
-		v_outtime = timezone.now()
+		v_intime = dateparse.parse_datetime(request.POST['v_intime'])
+		v_outtime = dateparse.parse_datetime(request.POST['v_outtime'])
 
-		try:
-			vehicle_obj = Vehicle.objects.get(number=v_number)
-		except Vehicle.DoesNotExist:
+		v_list = { 'CAR' : 'Car',
+					'TRUCK':'Truck',
+					'BIKE':'Bike',
+					'TAXI':'Taxi'
+				}
+		if v_type in v_list:
 			try:
-				# import pdb
-				# pdb.set_trace()
-				new_vehicle = Vehicle.objects.create(
-					name=v_name,
-					number=v_number,
-					v_type=v_type,
-					intime=v_intime,
-					outtime=v_outtime,
-				)
+				vehicle_obj = Vehicle.objects.get(number=v_number)
 			except Vehicle.DoesNotExist:
-				return HttpResponse(status=400)
+				try:
+					# import pdb
+					# pdb.set_trace()
+					new_vehicle = Vehicle.objects.create(
+						name=v_name,
+						number=v_number,
+						v_type=v_type,
+						intime=v_intime,
+						outtime=v_outtime,
+					)
+				except Vehicle.DoesNotExist:
+					return HttpResponse(status=400)
 
-			return HttpResponse(status=200)
+				return HttpResponse(status=200)
+		else:
+			return HttpResponse(status=400)
 	else:
 		return HttpResponse(status=403)

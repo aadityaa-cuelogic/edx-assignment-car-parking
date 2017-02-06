@@ -9,9 +9,20 @@ class Fare(models.Model):
 	fare = models.IntegerField()
 
 class Vehicle(models.Model):
+	vehicle_type = (
+	    ('CAR', 'Car'),
+	    ('TRUCK', 'Truck'),
+	    ('BUS', 'Bus'),
+	    ('BIKE', 'Bike'),
+	)
+
 	name = models.CharField(max_length=100)
 	number = models.CharField(max_length=100)
-	v_type = models.CharField(max_length=100)
+	v_type = models.CharField(
+				max_length=5,
+		        choices=vehicle_type,
+		        default='CAR',
+		    )
 	intime = models.DateTimeField()
 	outtime = models.DateTimeField()
 	created_on = models.DateTimeField(auto_now_add=True)

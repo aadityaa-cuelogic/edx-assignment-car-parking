@@ -47,8 +47,8 @@ function saveEditCar(){
 				'v_type':v_type,
 				'v_name':v_name,
 				'v_number':v_number,
-				'v_intime':v_intime,
-				'v_outtime':v_outtime,
+				'v_intime':moment(v_intime, "DD/MM/YYYY hh:mm A").format(),
+				'v_outtime':moment(v_outtime, "DD/MM/YYYY hh:mm A").format(),
 				'csrfmiddlewaretoken':$( "#csrfmiddlewaretoken" ).val()
 			},
 			beforeSend: function(){
@@ -57,13 +57,24 @@ function saveEditCar(){
 			},
 			success: function(response){
 				console.log(response, '====Success response===');
-				document.write('<h2>Success</h2><br><h1>Loading ...</h1>');
+				$(".edit-form").addClass('dnone').after('\
+						<div class="alert alert-success">\
+						  <strong>Success!</strong> Vehicle entry updated.\
+						</div>\
+				');
 				setTimeout(function(){
 					window.location.href = '/';
 				}, 3000);
 			},
 			error: function(response){
-				console.log(response, '====Error response===');
+				$(".edit-form").addClass('dnone').after('\
+						<div class="alert alert-error">\
+						  <strong>Error!</strong> Invalid request.\
+						</div>\
+				');
+				setTimeout(function(){
+					window.location.href = '/';
+				}, 3000);
 			}
 		});
 	}else{
@@ -72,14 +83,18 @@ function saveEditCar(){
 }
 
 function addNewCar(){
-	$("#addForm").validate();
+	var x= $("#addForm").validate();
+	var errorMsg = false;
+	for(var i in x.errorList){
+		errorMsg = x.errorList[i].message;
+	}
 	var inputDiv = $(".add-form");
 	var v_type = inputDiv.find('#v_type').val();
 	var v_name = inputDiv.find('#v_name').val();
 	var v_number = inputDiv.find('#v_number').val();
 	var v_intime = inputDiv.find('#v_intime').val();
 	var v_outtime = inputDiv.find('#v_outtime').val();
-	if(v_type != '' || v_name != '' || v_number != ''){// || v_outtime != '' || v_intime != ''){
+	if((v_type != '' && v_name != '' && v_number != '') && !(errorMsg)){// || v_outtime != '' || v_intime != ''){
 		$.ajax({
 			url: '/addnew/',
 			type: 'post',
@@ -87,8 +102,8 @@ function addNewCar(){
 				'v_type':v_type,
 				'v_name':v_name,
 				'v_number':v_number,
-				'v_intime':v_intime,
-				'v_outtime':v_outtime
+				'v_intime':moment(v_intime, "DD/MM/YYYY hh:mm A").format(),
+				'v_outtime':moment(v_outtime, "DD/MM/YYYY hh:mm A").format(),
 			},
 			beforeSend: function(){
 				$(".add-form").addClass('dnone');
@@ -96,7 +111,11 @@ function addNewCar(){
 			},
 			success: function(response){
 				console.log(response, '====Success response===');
-				document.write('<h2>Success</h2><br><h1>Loading ...</h1>');
+				$(".add-form").addClass('dnone').after('\
+					<div class="alert alert-success">\
+						  <strong>Success!</strong> Vehicle entry added.\
+						</div>\
+					');
 				setTimeout(function(){
 					window.location.href = '/';
 				}, 3000);
@@ -106,7 +125,7 @@ function addNewCar(){
 			}
 		});
 	}else{
-		alert("Invalid Data");
+		// alert("Invalid Data");
 	}
 }
 
@@ -123,7 +142,11 @@ function deleteCarParked(v_id){
 		},
 		success: function(response){
 			console.log(response,"====success delete response===");
-			$("#vehicles_table").addClass('dnone').after('<h2>Success</h2><br><h1>Loading ...</h1>');
+			$("#vehicles_table").addClass('dnone').after('\
+						<div class="alert alert-success">\
+						  <strong>Success!</strong> Vehicle entry removed.\
+						</div>\
+			');
 			setTimeout(function(){
 				window.location.href = '/';
 			}, 3000);
@@ -179,7 +202,7 @@ function getEditCar(){
 					enabledDates: [
                         moment(v_outtime)
                     ]
-				});
+				}); 
 			}
 
 		},
@@ -225,11 +248,19 @@ function getCarsParkedList(){
 								<td>'+v_outtime+'</td>\
 								<td>\
 									<a class="btn btn-warning" href="/edit/'+v_id+'" role="button">Edit</a>\
-									<button id="'+v_id+'" class="btn btn-danger" onclick=deleteCarParked('+v_id+')>Delete</button>\
+									<button id="'+v_id+'" class="btn btn-danger deleteCarClick">Delete</button>\
 								</td>\
 							</tr>';
 			}
 			$("#vehicles_table").html(table_tr+'</tbody>')
+			$('.deleteCarClick').on('click', function(e){
+				e.preventDefault();
+				var deleteId = $(this).attr('id');
+			    $('#confirm').modal({ backdrop: 'static', keyboard: false })
+			        .one('click', '#deleteBtn', function (e) {
+			            deleteCarParked(deleteId);
+			    });
+			});
 
 		},
 		error:function(response){

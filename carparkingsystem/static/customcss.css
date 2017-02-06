@@ -35,6 +35,10 @@ caption {
           box-shadow: inset 0 3px 6px rgba(0,0,0,.05);
 }
 
+.popover {
+    max-width: 600px;
+}
+
 @media (min-width: 768px) {
   .bs-example {
     margin-right: 0;

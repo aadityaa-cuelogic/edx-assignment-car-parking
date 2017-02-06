@@ -41,17 +41,23 @@
         		<form id="addForm" name="addForm">
 					<div class="form-group">
 						<label for="v_type">Vehicle Type</label>
-						<input class="form-control" type="text" name="v_type" id="v_type" placeholder="Enter vehicle type" value=""><br>
+						<!-- <input class="form-control" type="text" name="v_type" maxlength="100" id="v_type" placeholder="Enter vehicle type" value=""><br> -->
+						<select name="v_type" id="v_type" class="form-control" required>
+							<option value="CAR" selected="selected">Car</option>
+							<option value="TRUCK">Truck</option>
+							<option value="TAXI">Taxi</option>
+							<option value="BIKE">Bike</option>
+						</select><br>
 					</div>
 
 					<div class="form-group">
 						<label for="v_name">Vehicle Name</label>
-						<input class="form-control" type="text" name="v_name" id="v_name" placeholder="Enter vehicle name" value=""><br>
+						<input class="form-control" type="text" name="v_name" maxlength="100" id="v_name" placeholder="Enter vehicle name" value=""><br>
 					</div>
 
 					<div class="form-group">
 						<label for="v_number">Vehicle Number</label>
-						<input class="form-control" type="text" name="v_number" id="v_number" placeholder="Enter vehicle number" value=""><br>
+						<input class="form-control" type="text" name="v_number" maxlength="100" id="v_number" placeholder="Enter vehicle number" value=""><br>
 					</div>
 
 					<div class="form-group">

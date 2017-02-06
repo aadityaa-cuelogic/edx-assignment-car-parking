@@ -40,7 +40,13 @@
         		<div class="bs-example edit-form dnone" data-example-id="basic-forms">
 					<div class="form-group">
 						<label for="v_type">Vehicle Type</label>
-						<input class="form-control" type="text" name="v_type" id="v_type" placeholder="Enter vehicle type" value=""><br>
+						<!-- <input class="form-control" type="text" name="v_type" id="v_type" placeholder="Enter vehicle type" value=""><br> -->
+						<select name="v_type" id="v_type" class="form-control" required>
+							<option value="CAR">Car</option>
+							<option value="TRUCK">Truck</option>
+							<option value="TAXI">Taxi</option>
+							<option value="BIKE">Bike</option>
+						</select><br>
 					</div>
 
 					<div class="form-group">
