@@ -38,6 +38,8 @@
     	<div class="starter-template">
         	<div class="col-md-12">
         		<div class="bs-example edit-form dnone" data-example-id="basic-forms">
+        			{% csrf_token %}
+        			<input type='hidden' name='owner' id="owner" value="">
 					<div class="form-group">
 						<label for="v_type">Vehicle Type</label>
 						<!-- <input class="form-control" type="text" name="v_type" id="v_type" placeholder="Enter vehicle type" value=""><br> -->

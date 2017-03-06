@@ -23,6 +23,8 @@ class Vehicle(models.Model):
 		        choices=vehicle_type,
 		        default='CAR',
 		    )
+	owner = models.ForeignKey('auth.User', related_name='vehicle',
+							  on_delete=models.CASCADE)
 	intime = models.DateTimeField()
 	outtime = models.DateTimeField()
 	created_on = models.DateTimeField(auto_now_add=True)

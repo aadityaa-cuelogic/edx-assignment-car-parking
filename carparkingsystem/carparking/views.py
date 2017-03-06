@@ -8,6 +8,36 @@ from datetime import datetime
 from django.utils import dateparse
 
 from .models import Vehicle, Fare
+from django.contrib.auth.models import User
+from carparking.serializers import VehicleSerializer, UserSerializer
+
+from rest_framework.decorators import api_view
+from rest_framework import permissions, viewsets
+from carparking.permissions import IsOwnerOrReadOnly
+from rest_framework import generics
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+
+# Code for Django Rest API
+@api_view(['GET'])
+def api_root(request, format=None):
+	return Response({
+		'users': reverse('user-list', request=request, format=format),
+		'vehicle': reverse('vehicle-list', request=request, format=format)
+		})
+
+
+class VehicleList(generics.ListCreateAPIView):
+	queryset = Vehicle.objects.all()
+	serializer_class = VehicleSerializer
+	permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+						  IsOwnerOrReadOnly)
+
+class VehicleDetail(generics.RetrieveUpdateDestroyAPIView):
+	queryset = Vehicle.objects.all()
+	serializer_class = VehicleSerializer
+	permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+						  IsOwnerOrReadOnly)
 
 # Create your views here.
 def index(request):
