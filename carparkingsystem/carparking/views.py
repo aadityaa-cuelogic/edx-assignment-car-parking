@@ -1,180 +1,35 @@
-from django.shortcuts import render
-from django.db import IntegrityError
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
-import json
-from django.utils import timezone
-from datetime import datetime
-from django.utils import dateparse
+from carparking.models import Vehicle
+from carparking.serializers import VehicleSerializer
+from django.http import Http404
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
-from .models import Vehicle, Fare
-from django.contrib.auth.models import User
-from carparking.serializers import VehicleSerializer, UserSerializer
+class ListVehicle(APIView):
 
-from rest_framework.decorators import api_view
-from rest_framework import permissions, viewsets
-from carparking.permissions import IsOwnerOrReadOnly
-from rest_framework import generics
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-
-# Code for Django Rest API
-@api_view(['GET'])
-def api_root(request, format=None):
-	return Response({
-		'users': reverse('user-list', request=request, format=format),
-		'vehicle': reverse('vehicle-list', request=request, format=format)
-		})
-
-
-class VehicleList(generics.ListCreateAPIView):
-	queryset = Vehicle.objects.all()
-	serializer_class = VehicleSerializer
-	permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-						  IsOwnerOrReadOnly)
-
-class VehicleDetail(generics.RetrieveUpdateDestroyAPIView):
-	queryset = Vehicle.objects.all()
-	serializer_class = VehicleSerializer
-	permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-						  IsOwnerOrReadOnly)
-
-# Create your views here.
-def index(request):
-	return render(request, "carparking/index.html", {})
-
-def get_cars_parked(request):
-	vehicle_list = Vehicle.objects.all()
-	response_data = []
-	vehicle_list_dict = {
-		'vehicle_list': None
-	}
-
-	for obj in vehicle_list:
-		vehicle_dict = {
-			'id': obj.id,
-			'name': obj.name,
-			'type': obj.v_type,
-			'number': obj.number,
-			'intime': obj.intime.isoformat(),
-			'outtime': obj.outtime.isoformat(),
-		}
-		response_data.append(vehicle_dict)
-
-	vehicle_list_dict['vehicle_list'] = response_data
-	return HttpResponse(json.dumps(vehicle_list_dict),
-		 content_type="application/json")
-
-def edit_car_entry(request, id=None):
-	if request.method == 'GET':
-		try:
-			vehicle_data = Vehicle.objects.get(pk=id)
-		except Vehicle.DoesNotExist:
-			return HttpResponse(status=404)
-		return render(request, "carparking/edit.html", {'request_id':id})
-	else:
-		return HttpResponse(status=400)
-
-@csrf_exempt
-def get_edit_car_entry(request, id=None):
-	if request.method == "GET":
-		response_data =[]
-		vehicle_list_dict = {}
-		try:
-			vehicle_obj = Vehicle.objects.get(pk=id)
-		except Vehicle.DoesNotExist:
-			return HttpResponse(status=404)
-		vehicle_dict = {
-			'id': vehicle_obj.id,
-			'name': vehicle_obj.name,
-			'type': vehicle_obj.v_type,
-			'number': vehicle_obj.number,
-			'intime': vehicle_obj.intime.isoformat(),
-			'outtime': vehicle_obj.outtime.isoformat(),
-		}
-		response_data.append(vehicle_dict)
-		vehicle_list_dict['vehicle_list'] = response_data
-		return HttpResponse(json.dumps(vehicle_list_dict), 
-			content_type="application/json", status=200)
-	else:
-		return HttpResponse(status=400)
-
-@csrf_exempt
-def save_edit_car_entry(request):
-	if request.method == "POST":
-		v_id = request.POST['v_id']
-		v_type = request.POST['v_type']
-		v_name = request.POST['v_name']
-		v_number = request.POST['v_number']
-		v_intime = dateparse.parse_datetime(request.POST['v_intime'])
-		v_outtime = dateparse.parse_datetime(request.POST['v_outtime'])
-
-		v_list = { 'CAR' : 'Car',
-					'TRUCK':'Truck',
-					'BIKE':'Bike',
-					'TAXI':'Taxi'
-				}
-		if v_type in v_list:
-			try:
-				# vehicle_obj = Vehicle.objects.get(pk=v_id)
-				Vehicle.objects.filter(pk=v_id).update(v_type=v_type, name=v_name,
-					 number=v_number, intime=v_intime, outtime=v_outtime)
-			except Vehicle.DoesNotExist or IntegrityError as e:
-				return HttpResponse(404)
-			return HttpResponse(status=200)
+	def get(self, request, pk=None, format=None):
+		if pk:
+			vehicle = Vehicle.objects.get(pk=pk)
+			serializer = VehicleSerializer(vehicle)
 		else:
-			return HttpResponse(status=400)
-	else:
-		return HttpResponse(status=400)
+			vehicle = Vehicle.objects.all()
+			serializer = VehicleSerializer(vehicle, many=True)
+		return Response(serializer.data)
 
-@csrf_exempt
-def delete_car_parked(request):
-	if request.method == "POST":
-		v_id = request.POST['v_id']
-		try:
-			vehicle_obj = Vehicle.objects.get(pk=v_id)
-		except Vehicle.DoesNotExist:
-			return HttpResponse(status=404)
-		Vehicle.objects.get(pk=v_id).delete()
-		return HttpResponse(status=200)
-	else:
-		return HttpResponse(status=400)
+	def post(self, request, format=None):
+		serializer = VehicleSerializer(data=request.data)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@csrf_exempt
-def add_new_car_parked(request):
-	if request.method == "GET":
-		return render(request, "carparking/addnew.html", {})
-	elif request.method == "POST":
-		v_type = request.POST['v_type']
-		v_name = request.POST['v_name']
-		v_number = request.POST['v_number']
-		v_intime = dateparse.parse_datetime(request.POST['v_intime'])
-		v_outtime = dateparse.parse_datetime(request.POST['v_outtime'])
+	def put(self, request, pk=None):
+		if pk:
+			vehicle = Vehicle.objects.get(pk=pk)
+			serializer = VehicleSerializer(vehicle, data=request.data)
+			if serializer.is_valid():
+				serializer.save()
+				return Response(serializer.data)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-		v_list = { 'CAR' : 'Car',
-					'TRUCK':'Truck',
-					'BIKE':'Bike',
-					'TAXI':'Taxi'
-				}
-		if v_type in v_list:
-			try:
-				vehicle_obj = Vehicle.objects.get(number=v_number)
-			except Vehicle.DoesNotExist:
-				try:
-					# import pdb
-					# pdb.set_trace()
-					new_vehicle = Vehicle.objects.create(
-						name=v_name,
-						number=v_number,
-						v_type=v_type,
-						intime=v_intime,
-						outtime=v_outtime,
-					)
-				except Vehicle.DoesNotExist:
-					return HttpResponse(status=400)
-
-				return HttpResponse(status=200)
-		else:
-			return HttpResponse(status=400)
-	else:
-		return HttpResponse(status=403)
+		
